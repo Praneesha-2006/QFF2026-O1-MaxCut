@@ -1,0 +1,46 @@
+{
+  "name": "ILLUSTRATIVE Processor B",
+  "official": false,
+  "num_qubits": 7,
+  "coupling_map": [
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      4,
+      5
+    ],
+    [
+      5,
+      6
+    ],
+    [
+      6,
+      0
+    ],
+    [
+      2,
+      6
+    ]
+  ],
+  "basis_gates": [
+    "rz",
+    "sx",
+    "x",
+    "cx"
+  ],
+  "note": "Participant-made test topology; not organizer supplied."
+}

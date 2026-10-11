@@ -1,0 +1,48 @@
+{
+  "graph": "graph2",
+  "nodes": 5,
+  "edges": [
+    [
+      0,
+      1,
+      1.0
+    ],
+    [
+      1,
+      2,
+      1.0
+    ],
+    [
+      2,
+      3,
+      1.0
+    ],
+    [
+      3,
+      4,
+      1.0
+    ],
+    [
+      4,
+      0,
+      1.0
+    ]
+  ],
+  "exact_optimum": 4.0,
+  "optimal_partitions": 10,
+  "layers": 1,
+  "optimized_parameters": [
+    0.7853971489428768,
+    0.39268119312236527
+  ],
+  "ideal_uncompiled_expected_cut": 3.749999996797412,
+  "shots": 4096,
+  "trials": 20,
+  "seed": 42,
+  "restarts": 3,
+  "optimizer": "COBYLA with exact statevector expectation",
+  "qiskit_version": "2.5.2",
+  "processor_configs": "ILLUSTRATIVE",
+  "noise": "1q depolarizing .001; CX depolarizing .02; readout .015",
+  "limitations": "NOT an official organizer-defined benchmark"
+}
