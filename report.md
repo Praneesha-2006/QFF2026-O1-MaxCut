@@ -1,115 +1,92 @@
 # Qiskit Fall Fest 2026 — Phase 1 O1 Max-Cut
-## Consolidated four-graph architecture study
+## Consolidated four-graph architecture-aware results (5-qubit A / 9-node B)
 
-**Benchmark status: ILLUSTRATIVE / PRELIMINARY — NOT THE OFFICIAL ORGANIZER BENCHMARK.**
+**Experiment scope:** Qiskit Aer simulation using two processor coupling graphs reconstructed from the supplied challenge diagrams. Exact nine-node numbering, native-gate assumptions and synthetic noise are documented; the experiment does **not** claim device calibration or real-hardware execution.
 
-**Problem statement:** Quantum Optimization O1 — Max-Cut.  
-**Method:** QAOA with one cost/mixer layer (p=1), COBYLA optimization of the *ideal exact-statevector* mean-cut objective (three starts; 100 maximum COBYLA iterations per start), exact brute-force classical baseline, and two illustrative architecture-dependent transpilation targets.  
-**Simulation:** Qiskit Aer ideal and synthetic-noise simulations; 20 runs with 4,096 shots per processor × noise condition × graph. Seed 42 for optimization/transpilation; trial seeds 1042–1061.  
-**Scope:** four unweighted graphs of 4–5 vertices, each fitting on both illustrative A/B processors.
+## 1. Method
 
-## 1. Setup and benchmarks
+- One selected problem statement: Quantum Optimization O1 — Max-Cut.
+- Graph JSON inputs: G1 original four-node graph; G2 cycle C5; G3 star K1,4; G4 complete K5.
+- Exact classical baseline by enumeration of all bit assignments for each small graph.
+- QAOA p=1, COBYLA optimization using exact noiseless statevector expectation; three starting points, 100 iteration limit, seed 42.
+- Identical logical circuit/optimized angles for A and B on the same graph; native-basis transpilation with initial layout physical qubits `[0, 1, ..., n−1]`, optimization level 1, seed 42.
+- Qiskit Aer: 20 trials, 4,096 shots per condition and graph; ideal and synthetic-noise conditions.
 
-- Graph 1 — original four-vertex, five-edge graph; exact optimum 4.
-- Graph 2 — five-cycle C5; exact optimum 4.
-- Graph 3 — five-vertex star K1,4; exact optimum 4.
-- Graph 4 — complete five-vertex graph K5; exact optimum 6.
-
-The classical reference enumerates all 2^n bit assignments and returns the maximum cut. The quantum result is evaluated as the *mean measured cut* (plus best sampled cut, optimal-solution probability and mean approximation ratio). A sampled maximum and a mean-cut score are distinct metrics. Input graphs may also have positive finite edge weights.
-
-## 2. Illustrative processor definitions
+## 2. Processor assumptions
 
 | Parameter | Processor A | Processor B |
 |---|---|---|
-| Physical qubits | 5 | 7 |
-| Undirected coupling edges | (0,1), (0,2), (0,3), (3,4) | (0,1), (1,2), (2,3), (3,4), (4,5), (5,6), (6,0), (2,6) |
-| Native basis | rz, sx, x, cx | rz, sx, x, cx |
-| Layout | Initial logical qubits 0…n−1 | Same |
-| Synthetic noise | Identical rates | Identical rates |
+| Graph size | 5 nodes | 9 nodes |
+| Coupling edges | (0,1), (0,2), (0,3), (3,4) | (0,1), (0,2), (1,3), (1,4), (2,3), (3,4), (3,5), (3,8), (4,5), (4,6), (5,7), (6,7) |
+| Two-qubit connectivity interpretation | Undirected pairs expanded into both CX directions | Same |
+| Assumed basis | `rz`, `sx`, `x`, `cx` | Same |
+| Assumed gate/noise rates | Same across A/B | Same across A/B |
 
-Noise: single-qubit depolarization probability 0.001 on `sx` and `x`, CX depolarization 0.02, and symmetric readout bit-flip rate 0.015. A and B share these illustrative nominal rates, so these experiments emphasize the selected connectivity and compiled circuits; actual hardware error rates are not measured. See `processors/*.json` and `src/processors.py` for exact implementation.
+The Processor B diagram is captioned as seven qubits but contains nine visible nodes. This study uses the nine-node graph shown in the diagram; its qubit numbering and traced edge interpretation are explained in `TOPOLOGY_9Q_README.md`. The diagram does not provide calibrated native gate rates. The code assumes one-qubit depolarizing probability 0.001 on `sx`/`x`, two-qubit depolarizing probability 0.02 on `cx`, and readout error probability 0.015 per bit, applied identically to both targets. These are **synthetic modeling choices**, not verified hardware calibrations.
 
-## 3. Classical and ideal-QAOA references
+## 3. Classical references and mean-cut results
 
-| Graph | Nodes | Edges | Exact Max-Cut | Ideal p=1 QAOA expectation | Ideal expectation / optimum |
-|---|---:|---:|---:|---:|---:|
-| G1 — Original | 4 | 5 | 4 | 3.237109 | 0.8093 |
-| G2 — Cycle C5 | 5 | 5 | 4 | 3.750000 | 0.9375 |
-| G3 — Star K1,4 | 5 | 4 | 4 | 3.000000 | 0.7500 |
-| G4 — Complete K5 | 5 | 10 | 6 | 5.905212 | 0.9842 |
+| Graph | Nodes | Edges | Exact optimum | Ideal p=1 expectation | A ideal | B ideal | A noisy | B noisy |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| G1 — Original | 4 | 5 | 4 | 3.237109 | 3.232336 | 3.239844 | 3.060974 | 3.075476 |
+| G2 — Cycle C5 | 5 | 5 | 4 | 3.750000 | 3.749219 | 3.746436 | 3.458057 | 3.549219 |
+| G3 — Star K1,4 | 5 | 4 | 4 | 3.000000 | 3.000391 | 3.002051 | 2.819666 | 2.824304 |
+| G4 — Complete K5 | 5 | 10 | 6 | 5.905212 | 5.902002 | 5.902002 | 5.615796 | 5.646704 |
 
-The ideal expected value represents the particular optimized p=1 QAOA ansatz, **not** the exact classical maximum. In particular, the star graph's expected value of 3 does not indicate that the exact optimum was calculated incorrectly. We have not established global optimality of the variational parameters.
+The classical optimum is the maximum possible cut; the reported QAOA mean cut is the average score of samples, not the largest sampled score. Ideal p=1 expectations can be below the classical optimum.
 
-## 4. Measured mean-cut performance
+## 4. Trial-level A/B difference and uncertainty
 
-| Graph | A ideal | B ideal | A noisy | B noisy | Noisy B−A |
-|---|---:|---:|---:|---:|---:|
-| G1 | 3.232336 | 3.239844 | 3.060974 | 3.064758 | +0.003784 |
-| G2 | 3.749219 | 3.746851 | 3.458057 | 3.520776 | +0.062720 |
-| G3 | 3.000391 | 3.001135 | 2.819666 | 2.777380 | −0.042285 |
-| G4 | 5.902002 | 5.902002 | 5.615796 | 5.614648 | −0.001147 |
+The differences below are `B−A`. The intervals are approximate 95% trial-level intervals calculated as mean ± 1.96 × standard error across 20 trials under fixed parameters and the chosen synthetic noise model. They do not cover alternative topology reconstructions, optimizer initialization uncertainty, hardware calibrations or differences between graph families.
 
-These are means of 20 trial-level sample means (4,096 shots each). See `results/graph*/summary.csv` for mean-cut confidence bounds, optimal-solution frequency and approximation ratios.
-
-## 5. Paired A/B statistical comparison
-
-**Difference is B minus A.** Confidence limits are the code's approximate `mean ± 1.96 × sample standard error` intervals over 20 trials, evaluated at *fixed optimized parameters and one synthetic noise model*. They are **not** end-to-end uncertainty estimates accounting for reoptimization, varying calibration, hardware, or between-graph generalization.
-
-| Graph | Ideal B−A (95% CI) | Noisy B−A (95% CI) | Noisy inference under simulation model |
+| Graph | Ideal B−A [95% CI] | Noisy B−A [95% CI] | Noisy conclusion |
 |---|---|---|---|
-| G1 | +0.007507 [0.002184, 0.012831] | +0.003784 [−0.001046, 0.008614] | Inconclusive |
-| G2 | −0.002368 [−0.005982, 0.001246] | +0.062720 [0.056623, 0.068816] | B better |
-| G3 | +0.000745 [−0.004796, 0.006285] | −0.042285 [−0.047510, −0.037061] | A better |
-| G4 | 0.000000 [0, 0] | −0.001147 [−0.004105, 0.001810] | Inconclusive |
+| G1 — Original | +0.007507 [+0.002184, +0.012831] | +0.014502 [+0.009665, +0.019339] | B higher under modeled conditions |
+| G2 — Cycle C5 | -0.002783 [-0.007092, +0.001526] | +0.091162 [+0.084499, +0.097825] | B higher under modeled conditions |
+| G3 — Star K1,4 | +0.001660 [-0.002757, +0.006077] | +0.004639 [-0.001164, +0.010442] | Inconclusive |
+| G4 — Complete K5 | +0.000000 [+0.000000, +0.000000] | +0.030908 [+0.025604, +0.036213] | B higher under modeled conditions |
 
-**Important interpretation:** The small nonzero G1 *ideal* difference is sampling variation; both architectures should theoretically implement the same logical ideal QAOA state, subject to correct compilation and measurement mapping. The identical G4 ideal samples arise from these simulations/seeds, not hardware equivalence. Matching integer seeds across differently compiled circuits is not by itself a guarantee of statistically paired random noise; the program labels trials by shared seed, and the reported intervals should be read as descriptive finite-shot estimates rather than a fully justified common-random-number experimental design. The graph-specific findings were not corrected for multiple hypothesis testing.
+For Graph 3 the noisy difference interval includes zero. Graphs 1, 2, and 4 show positive differences under the reported model; these exploratory comparisons are not adjusted for multiple testing. Identical ideal Graph 4 trial outcomes reflect deterministic simulation/seed behavior and do not prove physical equivalence. Matching simulator seeds does not guarantee independent physical noise realizations or rigorous common-random-number pairing.
 
-## 6. Compilation and architectural resource metrics
+## 5. Compiled architecture metrics
 
 | Graph | A depth | B depth | A CX | B CX | A excess depth | B excess depth | A excess CX | B excess CX |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| G1 | 40 | 35 | 16 | 16 | 16 | 11 | 6 | 6 |
-| G2 | 35 | 27 | 19 | 16 | 11 | 3 | 9 | 6 |
-| G3 | 29 | 40 | 11 | 17 | 8 | 19 | 3 | 9 |
-| G4 | 60 | 58 | 35 | 38 | 30 | 28 | 15 | 18 |
+| G1 — Original | 40 | 32 | 16 | 16 | 16 | 8 | 6 | 6 |
+| G2 — Cycle C5 | 35 | 25 | 19 | 11 | 11 | 1 | 9 | 1 |
+| G3 — Star K1,4 | 29 | 26 | 11 | 11 | 8 | 5 | 3 | 3 |
+| G4 — Complete K5 | 60 | 47 | 35 | 29 | 30 | 17 | 15 | 9 |
 
-The reference is the *same transpiler settings with an all-to-all coupling map*, not an uncompiled circuit. Depth and CX excess are proxy measures for connectivity/compilation overhead, **not exact SWAP counts**. In this native basis, routing operations can be decomposed to CX, so every compiled circuit reports zero *explicit* `swap` instructions despite overhead. No runtime or hardware resource advantage is claimed.
+Processor B gives lower compiled depth for all four fixed-layout experiments; G2 and G4 also use fewer native CX operations. These results depend on the particular graph-to-physical-qubit placement and Qiskit transpiler settings. **A shallow circuit does not alone imply lower hardware error; the observed noisy quality is evaluated separately.**
 
-- **Cycle (G2):** B's compilation reduces depth by 8 and CX by 3; its noisy mean cut is higher by 0.062720.
-- **Star (G3):** A's compilation reduces depth by 11 and CX by 6; its noisy mean cut is higher by 0.042285.
-- **Complete graph (G4):** B is 2 layers shallower but uses 3 **more** CX operations; noisy quality is inconclusive.
-- **Original graph (G1):** B is 5 layers shallower with equal CX; noisy quality is inconclusive.
+### Routing-overhead interpretation
 
-These results are consistent with the impact of graph interaction patterns and physical connectivity on compiled quantum circuits. They do **not** establish connectivity as the sole cause of observed differences or show that either processor is universally superior.
+The `reference_circuit` function transpiles the same circuit against an all-to-all coupling graph, with the same native gate basis and transpiler settings. **Excess depth** = target depth minus reference depth; **excess CX** = target CX count minus reference CX count. These figures are compilation-overhead proxies, not exact SWAP insertion counts or exclusively routing costs. Gate decomposition, gate cancellation, and scheduling can also affect the difference. Because the final native gate basis excludes `swap`, a routing SWAP may be decomposed into CX gates; `explicit_swaps = 0` is not evidence that no routing occurred. This experiment does **not** claim a calibrated or separately attributed count of physical SWAP operations.
 
-## 7. Reproducibility
+### Interpretation by graph
 
-From the repository root in a fresh Python 3.13 environment:
+- **G1 Original:** B depth 32 versus A 40, but CX counts equal (16). B has a small positive noisy difference under the model; avoid assigning it exclusively to CX reduction.
+- **G2 Cycle:** B depth 25 vs A 35 and CX 11 vs A 19. Largest observed positive noisy B−A difference (+0.091162).
+- **G3 Star:** B depth 26 vs A 29, both with 11 CX. Noisy difference is inconclusive.
+- **G4 Complete:** B depth 47 vs A 60 and CX 29 vs A 35. Positive noisy B−A difference (+0.030908).
+
+## 6. Reproducibility
+
+From the repository root after installing `requirements.txt`:
 
 ```powershell
-py -3.13 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-python -c "import sys; print(sys.executable)"
 python main.py --all --shots 4096 --trials 20 --restarts 3 --maxiter 100 --seed 42
 ```
 
-Per-graph outputs are written to `results/graph1` through `results/graph4`. Check `metadata.json` for optimizer settings, Qiskit version, parameter values, shot counts and seeds; `trials.csv` contains trial-level evidence and `paired_comparison.csv` contains paired-difference summaries. Baseline reproduction may depend on operating-system package resolution and simulator details. The clean-environment reproduction has **not** been independently verified as part of this static audit.
+The command overwrites `results/graph*/` and requires the corrected `processors/processor_B.json`. Each per-graph folder contains `summary.csv`, `trials.csv`, `paired_comparison.csv`, `architecture.csv`, `metadata.json`, transpiled circuit dumps, figures and an individual `report.md`. Ensure the entire four-graph results directory is regenerated before pushing to GitHub.
 
-## 8. Submission status and limitations
+## 7. Scope and limitations
 
-1. **Official specifications unverified:** organizer-approved O1 input instance(s), exact Processor A/B topology, basis, noise assumptions, metrics and any template rules are not established by the supplied starter guidance. Thus none of the numeric findings can be described as the official Phase-1 A/B benchmark.
-2. **Synthetic simulator, not quantum hardware:** no device calibration, gate duration, real-hardware noise, queue time or platform run cost was measured.
-3. **Algorithm scope:** shallow p=1 QAOA, 4–5 node example set, exact ideal parameter optimization, positive-weight Max-Cut. Scaling to larger graph sizes is limited by the illustrative 5-qubit A and 7-qubit B targets; a controlled comparison is limited to at most five logical vertices.
-4. **Statistical scope:** repeated shot sampling at fixed parameters, 20 trial seeds, approximate normal intervals; no optimizer uncertainty or robustness sweeps.
-5. **Reproducibility and disclosure:** verify fresh installation, judge access, official repository naming and required AI-assistance disclosure before submission. The root README and `OFFICIAL_REQUIREMENTS_PENDING.md` document the outstanding items.
+1. The processor network edges and qubit IDs are reconstructed from the diagram. The original slide uses a seven-qubit label next to a nine-node drawing; the nine-node interpretation is used here. The gate basis, noise rates and bidirectional CX permissions remain documented modeling assumptions.
+2. The experiment tests four selected small Max-Cut instances, not all graph families or large-graph scaling. Fair A/B benchmarking is limited to the smaller five-qubit architecture’s capacity.
+3. The experiment uses simulation, not real IBM hardware; no physical fidelity, calibration data or queue/run-time advantage was measured.
+4. The statistical intervals describe fixed-parameter finite-shot variation only and are not corrected for multiple testing.
+5. The output includes two-qubit CX/depth excess, **not** a directly identifiable SWAP count. The native-gate circuit can have zero explicit SWAP instructions after decomposition.
+6. Check the submission portal, naming rules, and AI-assistance disclosure separately. The public repository is an implementation artifact, not proof of final submission.
 
-**Phase 1 is the A/B comparison. Processor C/D and the Bell architecture task are Phase 2 per the participant instructions.**
-
-## 9. Output index
-
-- `results/graph1/` through `results/graph4/` — full per-graph numerical evidence and figures.
-- `results/graph*/report.md` — automatically generated per-graph analyses.
-- `results/graph*/metadata.json` — parameters, seeds, baseline and noise description.
-- `EXISTING_RESULTS_PRESERVED.md` — context on development-era results.
-- `OFFICIAL_REQUIREMENTS_PENDING.md` — mandatory organizer confirmation checklist.
+**Conclusion:** For the reconstructed nine-node Processor B and documented synthetic noise model, B compiles the tested QAOA circuits to lower depth in all four graph instances, and shows higher noisy mean-cut estimates with trial-level intervals excluding zero on G1, G2 and G4. The star graph’s noisy difference is inconclusive. The conclusions are conditional on the selected placement, processor reconstruction, compilation settings and noise model.

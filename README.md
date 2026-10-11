@@ -1,10 +1,10 @@
 # Qiskit Fall Fest 2026 — Quantum Optimization O1: Max-Cut
 
-**Status: four-graph illustrative architecture experiment completed; official benchmark requirements still unverified.**
+**Status: four-graph architecture-aware QAOA simulation completed; 5-qubit Processor A and 9-node Processor B reconstructed from the supplied diagrams. Native gate set and synthetic noise parameters are participant-defined assumptions.**
 
-This is a generalized, single-entry-point QAOA Max-Cut pipeline. It reads JSON graphs, computes exact classical Max-Cut baselines, optimizes QAOA with noiseless statevector expectation, transpiles the same logical circuit for two *illustrative* architectures, runs ideal and synthetic-noise simulations, and exports trial-level CSV data, architecture metrics, plots and reports.
+This is a generalized, single-entry-point QAOA Max-Cut pipeline. It reads JSON graphs, computes exact classical Max-Cut baselines, optimizes QAOA with noiseless statevector expectation, transpiles the same logical circuit for two diagram-derived architectures with documented assumptions, runs ideal and synthetic-noise simulations, and exports trial-level CSV data, architecture metrics, plots and reports.
 
-**Start with [report.md](report.md) for the consolidated four-graph findings.** For unresolved rules, see [OFFICIAL_REQUIREMENTS_PENDING.md](OFFICIAL_REQUIREMENTS_PENDING.md).
+**Start with [report.md](report.md) for the updated nine-node four-graph findings.** See [TOPOLOGY_9Q_README.md](TOPOLOGY_9Q_README.md) for topology reconstruction and [OFFICIAL_REQUIREMENTS_PENDING.md](OFFICIAL_REQUIREMENTS_PENDING.md) for remaining assumptions.
 
 ## Contents
 
@@ -17,6 +17,7 @@ results/graph1/ ... results/graph4/
 report.md
 requirements.txt
 OFFICIAL_REQUIREMENTS_PENDING.md
+TOPOLOGY_9Q_README.md
 EXISTING_RESULTS_PRESERVED.md
 ```
 
@@ -68,7 +69,7 @@ python main.py --graph data/my_graph.json --shots 4096 --trials 20 --restarts 3 
 }
 ```
 
-Positive weighted edges `[u,v,weight]` are supported. Vertices must be consecutively numbered starting at zero. Duplicate edges, loops and nonpositive weights are rejected. For these *illustrative* processors, at most five logical graph vertices fit both targets and permit a direct A/B comparison. The classical enumerator has a separate default safety limit of 18 nodes.
+Positive weighted edges `[u,v,weight]` are supported. Vertices must be consecutively numbered starting at zero. Duplicate edges, loops and nonpositive weights are rejected. For these diagram-derived processors, at most five logical graph vertices fit both targets and permit a direct A/B comparison. The classical enumerator has a separate default safety limit of 18 nodes.
 
 ## What the outputs mean
 
@@ -79,12 +80,12 @@ Positive weighted edges `[u,v,weight]` are supported. Vertices must be consecuti
 - **Paired B−A comparison:** the mean of trial-level differences indexed by matching seed; approximate 95% shot-sampling intervals, **not** hardware or reoptimization uncertainties.
 - **Depth/CX excess:** relative to a fully connected *transpiled reference* with the same gate basis and optimization level; not an exact count of routing SWAPs.
 
-The processor configs are **participant-generated examples** (`official: false`), not official QFF A/B definitions. They use the same native gate set and illustrative depolarizing/readout noise rates. The scripts deliberately reject configs not explicitly marked illustrative; obtaining official specifications will require adapting and checking the backend configuration pathway, then **rerunning** the benchmark. Do not simply edit `official` to `true` and assume the pipeline is compatible.
+Processor A is a 5-qubit reconstruction of the provided diagram; Processor B uses **all nine visible nodes** and 12 reconstructed connections from its diagram (whose printed label says seven qubits). The topology reconstructions, and particularly the edge interpretation and qubit numbering, are documented in `TOPOLOGY_9Q_README.md`. Configs retain `official: false` because gate basis, bidirectional CX and synthetic noise remain participant assumptions. The code explicitly accepts only configs labeled illustrative; do not change that flag casually.
 
 ## Submission and scientific limitations
 
-- The supplied Phase-1 instructions require the exact organizer-defined O1 instance/constraints and A/B processor assumptions. These are not established by the provided PDFs. **Do not claim this repository has completed the official benchmark.**
-- Four tested instances show that neither illustrative processor uniformly wins: B has an advantage on the cycle graph, A on the star graph, with inconclusive noisy quality differences on the other two graphs.
+- The three supplied documents show the A/B architecture diagrams but do not provide a unique machine-readable nine-node coupling map, calibration rates, or an O1 benchmark graph. The study therefore uses transparent diagram reconstruction and selected benchmark instances. **Do not claim a hardware-calibrated or uniquely specified official processor benchmark.**
+- In updated nine-node experiments, B has lower compiled depth on all four graphs. Noisy trial-level B−A confidence intervals exclude zero for G1, G2 and G4; G3 is inconclusive. These findings are specific to the fixed layout and noise assumptions.
 - Confidence intervals reflect fixed-parameter finite-shot sampling. Shared numeric seeds do not prove a strict common-random-number paired design. The four graph outcomes do not prove broad scalability or hardware performance.
 - Verify the organizer's required repo name and format, official benchmark details, AI/LLM-use disclosure, repository accessibility, and clean-environment reproduction before submission.
 - Generated results are committed as evidence; preserve full settings in `metadata.json` and trial CSV files. If rerunning with altered CLI options, clearly label/segregate the outputs.
@@ -93,11 +94,13 @@ The processor configs are **participant-generated examples** (`official: false`)
 
 - [x] Exactly one problem statement: O1 Max-Cut
 - [x] Generalized code and exact classical reference
-- [x] Illustrative A/B compilation and ideal/noisy simulations
+- [x] Diagram-derived A/B compilation and ideal/noisy simulations
 - [x] Four per-instance outputs and one consolidated report
-- [ ] Organizer-defined O1 and official A/B inputs/configurations confirmed and run
-- [ ] Fresh Python environment run completed and checked
-- [ ] Repository naming, public/judge access, and final commit verified
+- [x] Four-graph 5q/9q simulation results obtained
+- [x] Clean-environment dependency installation and single-graph execution completed
+- [x] Public GitHub repository access verified before this update
+- [ ] Verify final 9q code/results/report have been pushed together
+- [ ] Any additional organizer-mandated details and deadlines checked
 - [ ] AI/LLM disclosure completed if required
 
 **Acknowledgement:** AI assistance was used to help draft code and documentation; review the organizer's disclosure policy and include any mandated attribution or disclosure in the final submission.

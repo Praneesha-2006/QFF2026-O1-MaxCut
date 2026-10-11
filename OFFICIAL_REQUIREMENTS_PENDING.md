@@ -1,11 +1,9 @@
-# Verification required before official Phase-1 submission
+# Benchmark definitions and remaining assumptions
 
-- Organizer-specified O1 graph instance(s), any weighted edges, constraints and exact primary metrics.
-- Exact Processor A and B definitions, coupling maps, basis gate sets, noise assumptions, and execution modes.
-- Official A/B report/CSV field requirements, naming convention, and deadline.
-- Judge accessibility of the GitHub repository and fresh-environment reproducibility.
-- AI/LLM disclosure wording specified by organizers.
+This study uses the five-node Processor A graph and all nine visible nodes of the Processor B graph illustrated in the supplied challenge guideline. The Processor B slide caption says seven qubits, so the reconstruction explicitly uses nine drawn nodes and records all assigned edge IDs in `TOPOLOGY_9Q_README.md`.
 
-The two supplied PDFs give general Phase-1 instructions and illustrative architecture code. They do not establish a complete O1-specific benchmark. This repository is intentionally labeled preliminary.
+The supplied documents do not provide a separate machine-readable coupling map or device calibration data. Accordingly, native gates (`rz`, `sx`, `x`, `cx`), bidirectional CX, synthetic noise rates and fixed initial placement are documented participant modeling choices rather than official hardware calibrations.
 
-**Phase 1:** selected PS, core solution, Processor A/B run, measured comparison, reproducible outputs and GitHub submission. Processor C/D Bell-correlation challenge is Phase 2.
+The four graph JSON inputs are selected benchmark instances; no unique O1 graph input is specified in the supplied materials. The code is evaluated using Qiskit Aer simulation.
+
+Still verify any later-issued repository naming/template instructions, submission portal requirements, deadline, and AI/LLM disclosure rules. The benchmark is an architecture-aware simulation rather than a claim of exact calibrated IBM hardware reproduction.
