@@ -1,0 +1,10 @@
+processor,physical_qubits,depth,cx_gates,two_qubit_gates,explicit_swaps,circuit_width,reference_depth,reference_cx,depth_overhead,cx_overhead,graph
+A,5,40,16,16,0,5,24,10,16,6,graph1
+B,9,32,16,16,0,9,24,10,8,6,graph1
+A,5,35,19,19,0,5,24,10,11,9,graph2
+B,9,25,11,11,0,9,24,10,1,1,graph2
+A,5,29,11,11,0,5,21,8,8,3,graph3
+B,9,26,11,11,0,9,21,8,5,3,graph3
+A,5,60,35,35,0,5,30,20,30,15,graph4
+B,9,47,29,29,0,9,30,20,17,9,graph4
+B,9,55,30,30,0,9,30,18,25,12,o1_weighted_6node

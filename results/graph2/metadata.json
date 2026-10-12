@@ -43,6 +43,10 @@
   "optimizer": "COBYLA with exact statevector expectation",
   "qiskit_version": "2.5.2",
   "processor_configs": "ILLUSTRATIVE",
-  "noise": "1q depolarizing .001; CX depolarizing .02; readout .015",
+  "noise": "Master Guide: 1q depolarizing .001; CX depolarizing .005; readout .01",
+  "selected_processors": [
+    "A",
+    "B"
+  ],
   "limitations": "NOT an official organizer-defined benchmark"
 }

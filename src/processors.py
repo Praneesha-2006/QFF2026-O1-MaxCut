@@ -30,11 +30,11 @@ def compile_circuit(qc, config, seed=42):
 
 
 def noise_model():
-    # Example rates, NOT organizer supplied.
+    # Phase 1 Master Guide synthetic noise baseline (page 2).
     noise = NoiseModel()
     noise.add_all_qubit_quantum_error(depolarizing_error(0.001, 1), ['sx', 'x'])
-    noise.add_all_qubit_quantum_error(depolarizing_error(0.02, 2), ['cx'])
-    noise.add_all_qubit_readout_error(ReadoutError([[0.985, 0.015], [0.015, 0.985]]))
+    noise.add_all_qubit_quantum_error(depolarizing_error(0.005, 2), ['cx'])
+    noise.add_all_qubit_readout_error(ReadoutError([[0.99, 0.01], [0.01, 0.99]]))
     return noise
 
 

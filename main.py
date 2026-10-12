@@ -18,9 +18,11 @@ BASE = Path(__file__).resolve().parent
 def experiment(path, args):
     graph = load_graph(path)
     configs = load_processors(BASE / 'processors')
+    if args.processors != 'AB':
+        configs = {args.processors: configs[args.processors]}
     for label, config in configs.items():
         if graph['n'] > config['num_qubits']:
-            raise ValueError(f"{graph['name']}: {graph['n']} vertices cannot fit Processor {label} ({config['num_qubits']} qubits). Use <=5 nodes for controlled A/B comparisons.")
+            raise ValueError(f"{graph['name']}: {graph['n']} vertices cannot fit Processor {label} ({config['num_qubits']} qubits). Use --processors B for six-node O1 graphs; A/B comparison is limited to <=5 nodes.")
     optimum, solutions = exact_baseline(graph)
     params, ideal_expectation = optimize_qaoa(graph, args.layers, args.restarts, args.seed, args.maxiter)
     logical = circuit(graph, params, args.layers)
@@ -55,31 +57,30 @@ def experiment(path, args):
                 'trials':args.trials,'seed':args.seed,'restarts':args.restarts,
                 'optimizer':'COBYLA with exact statevector expectation',
                 'qiskit_version':qiskit_version,'processor_configs':'ILLUSTRATIVE',
-                'noise':'1q depolarizing .001; CX depolarizing .02; readout .015',
+                'noise':'Master Guide: 1q depolarizing .001; CX depolarizing .005; readout .01',
+                'selected_processors':list(configs),
                 'limitations':'NOT an official organizer-defined benchmark'}
     (out/'metadata.json').write_text(json.dumps(settings,indent=2),encoding='utf-8')
     report = [f'# {graph["name"]} — O1 Max-Cut A/B experiment', '',
-              '**Status: ILLUSTRATIVE ONLY; not an official organizer benchmark.**', '',
+              '**Processor coupling graphs are participant-defined; noise matches the Phase 1 Master Guide.**', '',
               f'- Graph: {graph["n"]} nodes; {len(graph["edges"])} edges',
               f'- Exact classical optimal cut: {optimum:g}',
               f'- p={args.layers}; statevector-optimized expected cut: {ideal_expectation:.6f}',
               f'- Shots per trial: {args.shots}; trial seeds: {args.trials}',
               '', '## A/B quality', '', summary.to_markdown(index=False), '',
               '## Architecture metrics', '', arch.to_markdown(index=False), '',
-              '## Paired A/B differences', '', paired.to_markdown(index=False), '',
+              '## Paired A/B differences', '',
+              paired.to_markdown(index=False) if not paired.empty else 'Not applicable: only Processor B can run a six-node QAOA circuit (Processor A has five physical qubits).', '',
               '## Interpretation and limitations', '',
               'The two implementations use the same logical graph, QAOA parameters, transpilation seed,',
-              'native gate basis and nominal illustrative noise rates. Circuit resource differences reflect',
+              'native gate basis and Phase 1 Master Guide synthetic noise rates. Circuit resource differences reflect',
               'the chosen example topology and layout, not measured IBM quantum hardware.',
               'Explicit SWAP count can be zero even when routing gates are decomposed into CX.',
               'Extra CX gates relative to a fully connected compilation are not an exact SWAP count.',
               'Intervals are approximate finite-shot confidence intervals at fixed parameters.',
               'Do not infer a hardware speed advantage from simulator runtime.', '',
-              '## Missing official challenge information', '',
-              '- Official O1 graph/instance and constraints',
-              '- Official A/B coupling maps, native gate sets and noise assumptions',
-              '- Organizer-defined benchmark reporting fields and repository naming',
-              '- AI-assistance disclosure policy confirmation', '']
+              '## Guide-specific limitation', '',
+              'PS-O1 specifies six logical vertices but Processor A has five physical qubits. The six-vertex case is therefore run only on Processor B; four smaller cases support an actual A/B comparison.', '']
     (out/'report.md').write_text('\n'.join(report),encoding='utf-8')
     print(f'\n{graph["name"]}: exact optimum {optimum:g}; ideal QAOA expectation {ideal_expectation:.4f}')
     print(summary[['processor','mode','mean_cut','ci95_low','ci95_high']].to_string(index=False))
@@ -92,6 +93,7 @@ def main():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--graph', help='Path to a graph JSON file')
     group.add_argument('--all', action='store_true', help='Run all data/*.json graphs')
+    parser.add_argument('--processors', choices=['AB','A','B'], default='AB', help='AB for <=5 vertices; B for required 6-node weighted instance')
     parser.add_argument('--layers', type=int, default=1)
     parser.add_argument('--restarts', type=int, default=4)
     parser.add_argument('--maxiter', type=int, default=150)

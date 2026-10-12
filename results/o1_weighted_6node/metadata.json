@@ -1,0 +1,71 @@
+{
+  "graph": "o1_weighted_6node",
+  "nodes": 6,
+  "edges": [
+    [
+      0,
+      2,
+      1.0
+    ],
+    [
+      0,
+      3,
+      1.0
+    ],
+    [
+      0,
+      4,
+      3.0
+    ],
+    [
+      1,
+      4,
+      2.0
+    ],
+    [
+      1,
+      5,
+      2.0
+    ],
+    [
+      2,
+      3,
+      2.0
+    ],
+    [
+      2,
+      4,
+      1.0
+    ],
+    [
+      3,
+      4,
+      5.0
+    ],
+    [
+      3,
+      5,
+      1.0
+    ]
+  ],
+  "exact_optimum": 16.0,
+  "optimal_partitions": 2,
+  "layers": 1,
+  "optimized_parameters": [
+    0.21674513983945592,
+    0.34539685466764025
+  ],
+  "ideal_uncompiled_expected_cut": 11.9789033561002,
+  "shots": 4096,
+  "trials": 20,
+  "seed": 42,
+  "restarts": 3,
+  "optimizer": "COBYLA with exact statevector expectation",
+  "qiskit_version": "2.5.2",
+  "processor_configs": "ILLUSTRATIVE",
+  "noise": "Master Guide: 1q depolarizing .001; CX depolarizing .005; readout .01",
+  "selected_processors": [
+    "B"
+  ],
+  "limitations": "NOT an official organizer-defined benchmark"
+}

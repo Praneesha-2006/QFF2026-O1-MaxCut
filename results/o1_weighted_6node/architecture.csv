@@ -1,0 +1,2 @@
+processor,physical_qubits,depth,cx_gates,two_qubit_gates,explicit_swaps,circuit_width,reference_depth,reference_cx,depth_overhead,cx_overhead
+B,9,55,30,30,0,9,30,18,25,12

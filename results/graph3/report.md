@@ -1,6 +1,6 @@
 # graph3 — O1 Max-Cut A/B experiment
 
-**Status: ILLUSTRATIVE ONLY; not an official organizer benchmark.**
+**Processor coupling graphs are participant-defined; noise matches the Phase 1 Master Guide.**
 
 - Graph: 5 nodes; 4 edges
 - Exact classical optimal cut: 4
@@ -12,9 +12,9 @@
 | processor   | mode   |   trials |   mean_cut |    sd_cut |   ci95_low |   ci95_high |   mean_approximation_ratio |   mean_optimal_probability |   mean_best_sampled_cut |
 |:------------|:-------|---------:|-----------:|----------:|-----------:|------------:|---------------------------:|---------------------------:|------------------------:|
 | A           | Ideal  |       20 |    3.00039 | 0.0151096 |    2.99377 |     3.00701 |                   0.750098 |                   0.451257 |                       4 |
-| A           | Noisy  |       20 |    2.81967 | 0.0198202 |    2.81098 |     2.82835 |                   0.704916 |                   0.370337 |                       4 |
+| A           | Noisy  |       20 |    2.92695 | 0.0163931 |    2.91977 |     2.93414 |                   0.731738 |                   0.417029 |                       4 |
 | B           | Ideal  |       20 |    3.00205 | 0.0215324 |    2.99261 |     3.01149 |                   0.750513 |                   0.451648 |                       4 |
-| B           | Noisy  |       20 |    2.8243  | 0.0266165 |    2.81264 |     2.83597 |                   0.706076 |                   0.371106 |                       4 |
+| B           | Noisy  |       20 |    2.92841 | 0.0213368 |    2.91905 |     2.93776 |                   0.732101 |                   0.417627 |                       4 |
 
 ## Architecture metrics
 
@@ -28,21 +28,18 @@
 | mode   |   difference_B_minus_A |    ci95_low |   ci95_high |
 |:-------|-----------------------:|------------:|------------:|
 | Ideal  |             0.00166016 | -0.00275708 |  0.00607739 |
-| Noisy  |             0.00463867 | -0.00116416 |  0.0104415  |
+| Noisy  |             0.00145264 | -0.00281838 |  0.00572366 |
 
 ## Interpretation and limitations
 
 The two implementations use the same logical graph, QAOA parameters, transpilation seed,
-native gate basis and nominal illustrative noise rates. Circuit resource differences reflect
+native gate basis and Phase 1 Master Guide synthetic noise rates. Circuit resource differences reflect
 the chosen example topology and layout, not measured IBM quantum hardware.
 Explicit SWAP count can be zero even when routing gates are decomposed into CX.
 Extra CX gates relative to a fully connected compilation are not an exact SWAP count.
 Intervals are approximate finite-shot confidence intervals at fixed parameters.
 Do not infer a hardware speed advantage from simulator runtime.
 
-## Missing official challenge information
+## Guide-specific limitation
 
-- Official O1 graph/instance and constraints
-- Official A/B coupling maps, native gate sets and noise assumptions
-- Organizer-defined benchmark reporting fields and repository naming
-- AI-assistance disclosure policy confirmation
+PS-O1 specifies six logical vertices but Processor A has five physical qubits. The six-vertex case is therefore run only on Processor B; four smaller cases support an actual A/B comparison.

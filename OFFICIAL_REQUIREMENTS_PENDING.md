@@ -1,9 +1,11 @@
-# Benchmark definitions and remaining assumptions
+# Guide interpretation and open requirements
 
-This study uses the five-node Processor A graph and all nine visible nodes of the Processor B graph illustrated in the supplied challenge guideline. The Processor B slide caption says seven qubits, so the reconstruction explicitly uses nine drawn nodes and records all assigned edge IDs in `TOPOLOGY_9Q_README.md`.
+The Phase 1 Master Guide explicitly permits custom coupling maps for Processor A (5q) and B (9q); the configured noise rates and basis gates follow its page 2 baseline.
 
-The supplied documents do not provide a separate machine-readable coupling map or device calibration data. Accordingly, native gates (`rz`, `sx`, `x`, `cx`), bidirectional CX, synthetic noise rates and fixed initial placement are documented participant modeling choices rather than official hardware calibrations.
+PS-O1 on page 4 specifies a six-node weighted instance, while Processor A has only five physical qubits. We therefore include a Processor B-only six-node experiment and separate A/B experiments on graphs fitting both machines. This is a physical capacity limitation, not a claim of completing a six-node A/B run.
 
-The four graph JSON inputs are selected benchmark instances; no unique O1 graph input is specified in the supplied materials. The code is evaluated using Qiskit Aer simulation.
+The guide requests an end-to-end `main.ipynb` and `results/tables/` plus `results/figures/`, which are supplied by this update after running the notebook/export script.
 
-Still verify any later-issued repository naming/template instructions, submission portal requirements, deadline, and AI/LLM disclosure rules. The benchmark is an architecture-aware simulation rather than a claim of exact calibrated IBM hardware reproduction.
+Routing-stage inserted SWAPs are not directly measured by the native final-circuit `explicit_swaps` field. Quantitative depth/CX excess is provided but cannot be relabeled as the exact inserted-SWAP count.
+
+Submission portal: https://qffsrmap2026.com/learning/hackathon. Deadline: 14 October 2026 at 23:59 IST. Confirm any required team details, and comply with any AI-use declaration in the actual portal.

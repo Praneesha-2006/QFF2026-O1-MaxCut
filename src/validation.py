@@ -37,6 +37,10 @@ def run_validation(graph, optimum, compiled, configs, shots, trials, seed):
                           'mean_optimal_probability': part.optimal_probability.mean(),
                           'mean_best_sampled_cut': part.best_sampled_cut.mean()})
     summary = pd.DataFrame(summaries)
+    if not {'A', 'B'}.issubset(compiled):
+        # For the required six-node O1 graph, Processor A has only five qubits.
+        # A B-only run is valid but must never fabricate an A/B paired difference.
+        return data, summary, pd.DataFrame(columns=['mode','difference_B_minus_A','ci95_low','ci95_high'])
     paired = data.pivot(index=['mode','seed'], columns='processor', values='mean_cut').reset_index()
     diffrows = []
     for mode, part in paired.groupby('mode'):

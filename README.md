@@ -1,23 +1,22 @@
-# Qiskit Fall Fest 2026 — O1: Max-Cut
+# Quantum Optimization (PS-O1): Weighted Max-Cut
 
-## Project Overview
+**Qiskit Fall Fest 2026 — Phase 1 | SRM University-AP**
 
-This project implements the **Quantum Approximate Optimization Algorithm (QAOA)** for the Max-Cut problem and compares its performance across two processor connectivity models using **Qiskit Aer**. The study evaluates how hardware topology affects circuit compilation and solution quality under ideal and simulated noisy conditions.
+## Problem and method
 
-## Approach
+We implement the Max-Cut problem using the Quantum Approximate Optimization Algorithm (QAOA, p=1). A classical exhaustive solver supplies the exact optimal cut for comparison. The same logical circuits are compiled and simulated on participant-designed architectures: **Processor A (5 qubits)** and **Processor B (9 qubits)**.
 
-- **Problem:** Quantum Optimization (O1) — Max-Cut.
-- **Algorithm:** QAOA with one layer (`p=1`), optimized using COBYLA.
-- **Classical baseline:** Exact Max-Cut solution by exhaustive search.
-- **Processor A:** Five-qubit connectivity graph.
-- **Processor B:** Nine-node connectivity graph reconstructed from the provided diagram.
-- **Evaluation:** Ideal/noisy mean cut, confidence intervals, circuit depth, CX gates, and connectivity-related compilation overhead.
+## Processor setup
 
-Both architectures use the same logical QAOA circuit and the same assumed native gates (`rz`, `sx`, `x`, `cx`). Noise parameters are synthetic and applied consistently; these are **simulation models, not calibrated physical devices**.
+| Setting | Processor A | Processor B |
+|---|---|---|
+| Physical qubits | 5 | 9 |
+| Gate basis | `rz`, `sx`, `x`, `cx` | same |
+| Connectivity | participant-designed branching tree | participant-designed 12-edge sparse network |
 
-## Setup and Execution
+Phase 1 Master Guide synthetic noise: **1q depolarizing 0.001; CX depolarizing 0.005; readout 0.01**, identically applied on A and B. Compilation: optimization level 1, seed 42, 4096 shots. Connectivity is a documented design choice, not a calibrated real-device map.
 
-Use Python 3.13 and run the following commands from the repository root in Windows PowerShell:
+## Installation and execution
 
 ```powershell
 py -3.13 -m venv .venv
@@ -25,49 +24,24 @@ py -3.13 -m venv .venv
 python -m pip install -r requirements.txt
 ```
 
-Reproduce all four benchmark experiments:
+Open **`main.ipynb`** in VS Code or Jupyter and run its cells from the repository root. Equivalent terminal commands:
 
 ```powershell
-python main.py --all --shots 4096 --trials 20 --restarts 3 --maxiter 100 --seed 42
+python scripts/generate_o1_graph.py
+python main.py --all --processors AB --shots 4096 --trials 20 --restarts 3 --maxiter 100 --seed 42
+python main.py --graph data/raw/o1_weighted_6node.json --processors B --shots 4096 --trials 20 --restarts 3 --maxiter 100 --seed 42
+python scripts/export_submission.py
+python scripts/plot_topologies.py
 ```
 
-The command regenerates files in `results/`.
+**Why two experiment groups?** PS-O1 specifies a **six-node weighted graph**, but Processor A has only five physical qubits. A direct six-qubit QAOA circuit therefore cannot run on A. We evaluate the specified six-node graph on B and retain four <=5-node graph instances for valid A/B comparison. We do not invent an A result for the six-node task.
 
-To run a single graph:
+## Results
 
-```powershell
-python main.py --graph data/graph2.json --shots 4096 --trials 20 --restarts 3 --maxiter 100 --seed 42
-```
+`results/graph1` through `results/graph4` store A/B benchmark data. `results/o1_weighted_6node` stores the B-only weighted graph results. `results/tables/` and `results/figures/` hold submission exports. Output includes exact cut, mean cut, approximation ratio, depth, CX count and connectivity-constrained overhead. **Excess CX does not equal an exact router-inserted SWAP count.**
 
-## Benchmark Results
+The prior experiment used different noise rates; **rerun the notebook before treating existing result files as Master Guide benchmark results**. See [report.md](report.md) and [ROUTING_ANALYSIS.md](ROUTING_ANALYSIS.md) for detailed architecture analysis and measurement limitations.
 
-Each processor was evaluated using **20 trials of 4,096 shots** per graph and simulation condition.
+## Repository layout
 
-| Graph | Exact Max-Cut | A noisy mean cut | B noisy mean cut | A depth | B depth |
-|---|---:|---:|---:|---:|---:|
-| G1 — Original | 4 | 3.0610 | 3.0755 | 40 | 32 |
-| G2 — Cycle C5 | 4 | 3.4581 | 3.5492 | 35 | 25 |
-| G3 — Star K1,4 | 4 | 2.8197 | 2.8243 | 29 | 26 |
-| G4 — Complete K5 | 6 | 5.6158 | 5.6467 | 60 | 47 |
-
-**Observation:** Processor B produces lower compiled circuit depth on all four graphs. Its noisy mean-cut improvement is supported by the reported trial-level 95% intervals for G1, G2, and G4; the difference for G3 is inconclusive. Findings are specific to the selected architectures, layout, and synthetic noise model.
-
-## Repository Structure
-
-```text
-main.py                        # Run experiments
-src/                           # QAOA, processor, evaluation and plotting modules
-data/                          # Four benchmark Max-Cut graphs
-processors/                    # Processor A and B configurations
-results/                       # Trial data, metrics, plots and per-graph reports
-report.md                      # Full methodology and statistical analysis
-ROUTING_ANALYSIS.md            # Circuit routing and overhead interpretation
-TOPOLOGY_9Q_README.md          # Processor B reconstruction details
-requirements.txt               # Python dependencies
-```
-
-## Results and Documentation
-
-The `results/graph1` through `results/graph4` folders contain the generated CSV measurements, architecture metrics, compiled circuits and figures. Refer to [report.md](report.md) for detailed experimental findings, [ROUTING_ANALYSIS.md](ROUTING_ANALYSIS.md) for the limitations of SWAP measurement, and [TOPOLOGY_9Q_README.md](TOPOLOGY_9Q_README.md) for topology assumptions.
-
-**Note:** The current routing metric is excess depth/CX relative to an all-to-all reference; it is **not** an exact pre-decomposition count of inserted SWAP operations. The nine-node Processor B graph is reconstructed from the pictured nodes; its native gates and noise rates are documented modeling assumptions.
+`main.ipynb`, `main.py`, `requirements.txt`, `data/raw/`, `data/processed/`, `processors/`, `src/`, `results/tables/`, `results/figures/`, `report.md`, `assets/`.

@@ -1,5 +1,5 @@
 {
-  "name": "Processor B \u2014 coordinator-confirmed 9-node guideline diagram",
+  "name": "Processor B \u2014 designed 9-qubit graph",
   "official": false,
   "num_qubits": 9,
   "coupling_map": [
@@ -58,16 +58,5 @@
     "x",
     "cx"
   ],
-  "note": "Graph digitized from the nine green nodes in the organizer slide; coordinator explicitly confirmed 'all nine'. Edges are interpreted from the diagram. Native gate basis and synthetic noise remain documented participant assumptions.",
-  "diagram_node_labels": {
-    "0": "left",
-    "1": "upper-left",
-    "2": "lower-left",
-    "3": "center",
-    "4": "upper-middle",
-    "5": "lower-right-middle",
-    "6": "upper-right",
-    "7": "right",
-    "8": "bottom"
-  }
+  "note": "Participant-defined 9-node, 12-edge topology inspired by the supplied reference diagram; not a unique required coupling map."
 }
